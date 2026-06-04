@@ -58,7 +58,6 @@ This behavior allows downstream tooling/plugins to process non-CSS imports (or u
 
 ```js
 import './counter.webcomponent.css';
-import { useState, useEffect, useRef, useEvent } from 'wc-hooks';
 
 function Counter({ initial = 0 }) {
   const [count, setCount] = useState(initial);

@@ -53,6 +53,9 @@ class %%CLASS_NAME%% extends HTMLElement {
   __rebindEvents() {
     this.__teardownEvents();
     for (const binding of this.__pendingEventBindings) {
+      if (!binding) {
+        continue;
+      }
       const node = binding.ref && binding.ref.current ? binding.ref.current : null;
       if (!node) {
         continue;

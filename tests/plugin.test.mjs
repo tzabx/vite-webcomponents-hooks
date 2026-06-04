@@ -60,6 +60,7 @@ test('transforms a complex hook component with refs, effects, events and context
   assert.match(output, /const __wcjs_styles/);
   assert.match(output, /__resolveRefs\(\)/);
   assert.match(output, /__rebindEvents\(\)/);
+  assert.match(output, /if \(!binding\) \{/);
   assert.match(output, /__hookEffects/);
   assert.match(output, /__refs/);
   assert.match(output, /ThemeContext/);
@@ -108,4 +109,53 @@ test('ignores files without the .webcomponent.js suffix', () => {
   const result = plugin.transform.call({}, "export default 1;", '/virtual/not-a-component.js');
 
   assert.equal(result, null);
+});
+
+test('generated __rebindEvents guards against undefined bindings in sparse arrays', () => {
+  const output = transformSource([
+    "import { useState, useRef, useEvent } from 'wc-hooks';",
+    '',
+    'function Sparse() {',
+    '  const [count, setCount] = useState(0);',
+    '  const btnRef = useRef();',
+    "  useEvent(btnRef, 'click', () => setCount(count + 1));",
+    '  return `<button ref="btnRef">${count}</button>`;',
+    '}',
+  ].join('\n'), '/virtual/sparse.webcomponent.js');
+
+  assert.match(output, /if \(!binding\) \{/);
+  assert.match(output, /continue;/);
+});
+
+test('generated __rebindEvents only binds events where ref.current is set', () => {
+  const output = transformSource([
+    "import { useRef, useEvent } from 'wc-hooks';",
+    '',
+    'function Guarded() {',
+    '  const btnRef = useRef();',
+    "  useEvent(btnRef, 'click', () => {});",
+    '  return `<button ref="btnRef">click</button>`;',
+    '}',
+  ].join('\n'), '/virtual/guarded.webcomponent.js');
+
+  assert.match(output, /binding\.ref && binding\.ref\.current/);
+  assert.match(output, /node\.addEventListener/);
+  assert.match(output, /__activeEventBindings\.push/);
+});
+
+test('generated disconnectedCallback tears down active event listeners', () => {
+  const output = transformSource([
+    "import { useRef, useEvent } from 'wc-hooks';",
+    '',
+    'function TearDown() {',
+    '  const btnRef = useRef();',
+    "  useEvent(btnRef, 'click', () => {});",
+    '  return `<button ref="btnRef">x</button>`;',
+    '}',
+  ].join('\n'), '/virtual/teardown.webcomponent.js');
+
+  assert.match(output, /disconnectedCallback\(\) \{/);
+  assert.match(output, /__cleanupEffects\(\)/);
+  assert.match(output, /__teardownEvents\(\)/);
+  assert.match(output, /removeEventListener/);
 });
