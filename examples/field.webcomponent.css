@@ -1,0 +1,7 @@
+:host {
+  display: inline-block;
+}
+
+.field-label {
+  font-weight: 600;
+}

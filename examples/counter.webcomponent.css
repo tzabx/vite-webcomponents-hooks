@@ -1,0 +1,23 @@
+:host {
+  display: inline-flex;
+  font-family: system-ui, sans-serif;
+}
+
+.counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d0d7de;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.5rem 0.9rem;
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+}
