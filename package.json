@@ -8,6 +8,10 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json && mkdir -p dist/templates && cp src/templates/*.template.js dist/templates/",
     "test": "npm run build && node --test tests/*.test.mjs"
