@@ -1,5 +1,6 @@
 import * as t from '@babel/types';
 import type { ComponentAnalysis } from '../../types.js';
+import { collectHookUsage } from './hook-usage.js';
 import { extractPropsFromParam } from './props.js';
 import { collectRefBindings } from './ref-bindings.js';
 
@@ -28,12 +29,14 @@ export function statementToAnalysis(statement: t.Statement): ComponentAnalysis |
   if (t.isFunctionDeclaration(statement) && statement.id) {
     const props = statement.params[0] ? extractPropsFromParam(statement.params[0]) : [];
     const refBindings = collectRefBindings(statement.body.body);
+    const hookUsage = collectHookUsage(statement.body.body);
 
     return {
       name: statement.id.name,
       declaration: statement,
       props,
       refBindings,
+      hookUsage,
     };
   }
 
@@ -51,12 +54,14 @@ export function statementToAnalysis(statement: t.Statement): ComponentAnalysis |
       const props = params[0] ? extractPropsFromParam(params[0]) : [];
       const bodyStatements = t.isBlockStatement(declarator.init.body) ? declarator.init.body.body : [];
       const refBindings = collectRefBindings(bodyStatements);
+      const hookUsage = collectHookUsage(bodyStatements);
 
       return {
         name: declarator.id.name,
         declaration: statement,
         props,
         refBindings,
+        hookUsage,
       };
     }
   }

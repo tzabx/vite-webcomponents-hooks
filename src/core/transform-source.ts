@@ -92,6 +92,9 @@ function generateTransformedSource(
     .map((prop) => JSON.stringify(toKebabCase(prop.key)))
     .join(', ');
 
+  const hasRefs = analysis.refBindings.length > 0;
+  const hasEvents = analysis.hookUsage.useEvent;
+  const hasEffects = analysis.hookUsage.useEffect;
   const refBindings = JSON.stringify(analysis.refBindings);
   const moduleSource = babelGenerate(program, { compact: false }).code;
   const styleArray = cssImports.map((style) => style.localName).join(', ');
@@ -103,6 +106,26 @@ function generateTransformedSource(
     ? loadTemplate('runtime.template.js')
     : '';
 
+  const refsState = hasRefs
+    ? `    this.__refBindings = ${refBindings};\n    this.__refs = {};`
+    : '';
+  const eventsState = hasEvents
+    ? '    this.__pendingEventBindings = [];\n    this.__activeEventBindings = [];'
+    : '';
+  const effectsState = hasEffects
+    ? '    this.__hookEffects = [];\n    this.__pendingEffects = [];'
+    : '';
+
+  const refsMethods = hasRefs
+    ? loadTemplate('features/refs.methods.partial.js').trim()
+    : '';
+  const eventsMethods = hasEvents
+    ? loadTemplate('features/events.methods.partial.js').trim()
+    : '';
+  const effectsMethods = hasEffects
+    ? loadTemplate('features/effects.methods.partial.js').trim()
+    : '';
+
   return renderTemplate(loadTemplate('transform-output.template.js'), {
     '%%RUNTIME_HELPERS%%': runtimeHelpers,
     '%%MODULE_SOURCE%%': moduleSource,
@@ -111,7 +134,17 @@ function generateTransformedSource(
     '%%OBSERVED_ATTRIBUTES%%': observedAttributes,
     '%%ATTR_TO_PROP%%': propAttrMapEntries,
     '%%PROP_ENTRIES%%': propEntries,
-    '%%REF_BINDINGS%%': refBindings,
+    '%%REFS_STATE%%': refsState,
+    '%%EVENTS_STATE%%': eventsState,
+    '%%EFFECTS_STATE%%': effectsState,
+    '%%REFS_METHODS%%': refsMethods,
+    '%%EVENTS_METHODS%%': eventsMethods,
+    '%%EFFECTS_METHODS%%': effectsMethods,
+    '%%REFS_RENDER%%': hasRefs ? '    this.__resolveRefs();' : '',
+    '%%EVENTS_RENDER%%': hasEvents ? '    this.__rebindEvents();' : '',
+    '%%EFFECTS_RENDER%%': hasEffects ? '    this.__flushEffects();' : '',
+    '%%EFFECTS_DISCONNECT%%': hasEffects ? '    this.__cleanupEffects();' : '',
+    '%%EVENTS_DISCONNECT%%': hasEvents ? '    this.__teardownEvents();' : '',
     '%%COMPONENT_CALL%%': `${analysis.name}(this.__props)`,
     '%%TAG_NAME%%': tagName,
   });
