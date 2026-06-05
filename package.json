@@ -1,6 +1,6 @@
 {
   "name": "vite-webcomponents-hooks",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Vite plugin that transforms .webcomponent.js files into hook-based Web Components",
   "type": "module",
   "main": "dist/index.js",

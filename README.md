@@ -2,6 +2,8 @@
 
 Vite plugin that transforms `.webcomponent.js` files into standard Custom Elements with a lightweight hooks runtime.
 
+This project is inspired by React's function-component and hooks ergonomics, but it is not a React runtime.
+
 ## What this plugin does
 
 - Intercepts `.webcomponent.js` files in Vite's `transform` hook.
@@ -120,6 +122,27 @@ The plugin emits code that:
 
 - Provides a minimal context mechanism.
 - `Provider` updates context values for reads via `useContext`.
+
+## React-inspired API and intentional scope
+
+### React-inspired or similar concepts
+
+- Function components as the authoring model.
+- Hook-style APIs (`useState`, `useEffect`, `useRef`, `useEvent`).
+- Context-like API with `createContext` and `useContext`.
+- Props-driven rendering.
+- Lifecycle-like behavior through mount/unmount effect cleanup.
+
+### React features not available (by design)
+
+- No Virtual DOM or reconciliation engine.
+- No JSX transform pipeline in this plugin.
+- No Fiber scheduler, concurrent rendering, transitions, or priorities.
+- No class component API (`setState`, lifecycle methods).
+- No synthetic event system (native DOM events are used).
+- No portals, Suspense, error boundaries, or React Server Components.
+- No React DevTools integration.
+- No compatibility goal with the full React semantics/spec.
 
 ## Props and attributes
 
